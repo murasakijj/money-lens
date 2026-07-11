@@ -23,6 +23,16 @@ Authorization: Bearer <Firebase IDトークン>
 
 **認証なしで応答するエンドポイントを作らないこと。** ヘルスチェック等も不要。
 
+### GET /api/auth-check — ログイン直後の許可判定
+
+フロントはGoogleログイン成功直後にこのエンドポイントを呼び、`ALLOWED_EMAILS` に含まれるかだけを確認する（GitHubへの往復なし。データファイルの有無で403/404を区別する必要をなくすための専用エンドポイント）。
+
+- 認証成功 → `200 { "ok": true }`
+- トークン無効 → `401`
+- 許可リスト外 → `403`
+
+フロントはこのレスポンスを見て、403の場合のみ「アクセス権がありません」を表示してサインアウトする（docs/ui.md /login 参照）。
+
 ### エラーレスポンス
 
 ```json
@@ -31,13 +41,13 @@ Authorization: Bearer <Firebase IDトークン>
 
 `error` は機械可読な短いコードのみ。内部情報（スタックトレース、リポジトリパス、トークン）を含めない。
 
-| ステータス | 意味 |
-|---|---|
-| 401 | トークンなし/無効 |
-| 403 | 許可リスト外のメール |
-| 404 | データファイルなし |
-| 409 | GitHub sha 不一致（再読込が必要） |
-| 502 | GitHub/Anthropic 上流エラー |
+| ステータス | 意味                              |
+| ---------- | --------------------------------- |
+| 401        | トークンなし/無効                 |
+| 403        | 許可リスト外のメール              |
+| 404        | データファイルなし                |
+| 409        | GitHub sha 不一致（再読込が必要） |
+| 502        | GitHub/Anthropic 上流エラー       |
 
 ---
 
@@ -97,7 +107,9 @@ GitHub Contents API のプロキシ。対象リポジトリは環境変数 `GITH
     "budgets": { "food": 90000 },
     "income": 580000,
     "specialNotes": ["定期券購入(5万円)"],
-    "recentMonthsTrend": [ { "month": "2026-01", "expense": -350000, "income": 580000 } ]
+    "recentMonthsTrend": [
+      { "month": "2026-01", "expense": -350000, "income": 580000 }
+    ]
   }
 }
 ```
@@ -145,7 +157,9 @@ const client = new Anthropic(); // ANTHROPIC_API_KEY を環境変数から自動
 const stream = client.messages.stream({
   model: "claude-sonnet-5",
   max_tokens: 4096,
-  system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
+  system: [
+    { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
+  ],
   messages,
 });
 ```
@@ -157,10 +171,10 @@ const stream = client.messages.stream({
 
 ### コスト目安
 
-| 操作 | 概算トークン | 概算コスト（$3/$15、割引期間$2/$10） |
-|---|---|---|
-| 月次分析1回 | 入力 ~3K / 出力 ~1.5K | 約 $0.03（約5円） |
-| チャット1往復 | 入力 ~4K / 出力 ~1K | 約 $0.03 |
+| 操作          | 概算トークン          | 概算コスト（$3/$15、割引期間$2/$10） |
+| ------------- | --------------------- | ------------------------------------ |
+| 月次分析1回   | 入力 ~3K / 出力 ~1.5K | 約 $0.03（約5円）                    |
+| チャット1往復 | 入力 ~4K / 出力 ~1K   | 約 $0.03                             |
 
 個人利用（月に分析数回+チャット数十回）で **月数十円〜数百円** 程度。
 
@@ -172,9 +186,12 @@ const stream = client.messages.stream({
 money-lens/
 ├─ api/
 │   ├─ _lib/
+│   │   ├─ types.ts       ← Vercel Functions用の最小リクエスト/レスポンス型
 │   │   ├─ auth.ts        ← IDトークン検証 + メール許可リスト
 │   │   ├─ github.ts      ← Contents API ラッパー
+│   │   ├─ fileAllowlist.ts ← /api/data の file パラメータ許可リスト
 │   │   └─ prompts.ts     ← システムプロンプト定数
+│   ├─ auth-check.ts      ← GET /api/auth-check
 │   ├─ data.ts            ← GET/PUT /api/data
 │   ├─ analyze.ts         ← POST /api/analyze
 │   └─ chat.ts            ← POST /api/chat

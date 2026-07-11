@@ -8,14 +8,14 @@
 
 **実装は [docs/implementation-plan.md](../docs/implementation-plan.md) のタスクを上から順に進める。** 各タスクの受け入れ条件を満たしてから次へ。設計の詳細は以下を参照:
 
-| 文書 | 内容 |
-|---|---|
-| [docs/spec.md](../docs/spec.md) | 仕様書（確定版・全体像） |
-| [docs/architecture.md](../docs/architecture.md) | システム構成・認証・セキュリティ・環境変数 |
-| [docs/data-model.md](../docs/data-model.md) | JSONスキーマ |
-| [docs/api.md](../docs/api.md) | Vercel Functions仕様・Anthropic呼び出し規約 |
-| [docs/ui.md](../docs/ui.md) | 画面仕様 |
-| [docs/data-migration.md](../docs/data-migration.md) | Excel→JSON移行 |
+| 文書                                                | 内容                                        |
+| --------------------------------------------------- | ------------------------------------------- |
+| [docs/spec.md](../docs/spec.md)                     | 仕様書（確定版・全体像）                    |
+| [docs/architecture.md](../docs/architecture.md)     | システム構成・認証・セキュリティ・環境変数  |
+| [docs/data-model.md](../docs/data-model.md)         | JSONスキーマ                                |
+| [docs/api.md](../docs/api.md)                       | Vercel Functions仕様・Anthropic呼び出し規約 |
+| [docs/ui.md](../docs/ui.md)                         | 画面仕様                                    |
+| [docs/data-migration.md](../docs/data-migration.md) | Excel→JSON移行                              |
 
 設計とズレる実装をしたくなったら、勝手に変えず**まずユーザーに確認**し、docs/ を直してからコードを書く（docsが常に正）。
 
@@ -47,12 +47,12 @@
 
 ## 開発フェーズ
 
-| フェーズ | 内容 |
-|---|---|
-| Phase 0 | 基盤・Vercel連携・Firebase認証・データプロキシ |
-| Phase 1 | Excel移行・ダッシュボード・明細/CSVインポート・給与/資産画面 |
-| Phase 2 | AI月次分析 + チャットUI |
-| Phase 3 | ライフイベント入力・将来シミュレーター（ローン/教育費）・AI講評 |
+| フェーズ | 内容                                                            |
+| -------- | --------------------------------------------------------------- |
+| Phase 0  | 基盤・Vercel連携・Firebase認証・データプロキシ                  |
+| Phase 1  | Excel移行・ダッシュボード・明細/CSVインポート・給与/資産画面    |
+| Phase 2  | AI月次分析 + チャットUI                                         |
+| Phase 3  | ライフイベント入力・将来シミュレーター（ローン/教育費）・AI講評 |
 
 ## 参考: 既存資産
 

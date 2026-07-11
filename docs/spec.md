@@ -20,14 +20,14 @@
 
 ## 技術スタック（確定）
 
-| 要素 | 採用技術 | 備考 |
-|---|---|---|
-| フロントエンド | React + Vite + TypeScript | グラフはRecharts |
-| ホスティング | Vercel（無料） | pushで自動デプロイ |
-| API | Vercel Functions | **秘密鍵はすべてサーバ側**。バックエンドサーバー不要 |
-| 認証 | Firebase Authentication（Googleログイン） | walk_diaryで実績あり。Functions側でIDトークン検証+メール許可リスト |
-| データ保存 | GitHub private repo `money-lens-data`（JSON） | アプリrepoと分離（デプロイ暴発防止）。コミット履歴=変更履歴 |
-| AI分析 | Anthropic API `claude-sonnet-5` | **Functionsプロキシ経由**（フロント直呼びはしない） |
+| 要素           | 採用技術                                      | 備考                                                               |
+| -------------- | --------------------------------------------- | ------------------------------------------------------------------ |
+| フロントエンド | React + Vite + TypeScript                     | グラフはRecharts                                                   |
+| ホスティング   | Vercel（無料）                                | pushで自動デプロイ                                                 |
+| API            | Vercel Functions                              | **秘密鍵はすべてサーバ側**。バックエンドサーバー不要               |
+| 認証           | Firebase Authentication（Googleログイン）     | walk_diaryで実績あり。Functions側でIDトークン検証+メール許可リスト |
+| データ保存     | GitHub private repo `money-lens-data`（JSON） | アプリrepoと分離（デプロイ暴発防止）。コミット履歴=変更履歴        |
+| AI分析         | Anthropic API `claude-sonnet-5`               | **Functionsプロキシ経由**（フロント直呼びはしない）                |
 
 > 変更履歴: 当初案の「Anthropic APIをフロントから直接呼ぶ」「環境変数パスワード認証」は、APIキー露出リスクと実績あるGoogleログインパターンを踏まえ上記に変更（2026-07-11）。
 
@@ -35,27 +35,31 @@
 
 ## リポジトリ
 
-| リポジトリ | 用途 | 公開設定 |
-|---|---|---|
-| https://github.com/murasakijj/money-lens | アプリ本体 + 設計書 | **Private** |
-| https://github.com/murasakijj/money-lens-data | 家計データ（JSON） | **Private**（作成予定） |
+| リポジトリ                                    | 用途                | 公開設定                |
+| --------------------------------------------- | ------------------- | ----------------------- |
+| https://github.com/murasakijj/money-lens      | アプリ本体 + 設計書 | **Private**             |
+| https://github.com/murasakijj/money-lens-data | 家計データ（JSON）  | **Private**（作成予定） |
 
 ---
 
 ## 開発フェーズ
 
 ### Phase 0: 基盤 + 認証（最初に鍵をかける）
+
 - Vite初期化、Vercel連携、Firebase Auth（Google + メール許可リスト）、GitHubデータプロキシ
 
 ### Phase 1: データ移行 + 可視化（2〜3週間）
+
 - Excel→JSON移行（全明細・給与・月次残高）
 - ダッシュボード（カテゴリ別円グラフ・予算バー・12ヶ月推移・**特別出費マーク**）
 - 明細一覧/編集、CSVインポート（カード家計簿アプリ形式）、給与推移、資産推移
 
 ### Phase 2: AI分析（+1〜2週間）
+
 - 月次自動分析（下記4段構成）+ チャット相談UI（SSEストリーミング）
 
 ### Phase 3: 将来設計（+1〜2週間）
+
 - ライフイベント入力（**住宅ローン・出産/教育費**・収入変化）
 - 3〜5年キャッシュフロー試算、スライダーで前提を動的変更、シナリオ比較 + AI講評
 
@@ -76,11 +80,11 @@
 
 ## 設計書一覧（実装はこれらに従う）
 
-| 文書 | 内容 |
-|---|---|
-| [architecture.md](./architecture.md) | システム構成・認証設計・セキュリティチェックリスト・環境変数 |
-| [data-model.md](./data-model.md) | JSONスキーマ（取引/給与/月次/カテゴリ/予算/ライフイベント） |
-| [api.md](./api.md) | Vercel Functionsエンドポイント仕様・Anthropic呼び出し規約 |
-| [ui.md](./ui.md) | 画面仕様（9画面） |
-| [data-migration.md](./data-migration.md) | Excel→JSON変換仕様・検証手順 |
-| [implementation-plan.md](./implementation-plan.md) | 受け入れ条件付きタスク分解（実装モデルはここから着手） |
+| 文書                                               | 内容                                                         |
+| -------------------------------------------------- | ------------------------------------------------------------ |
+| [architecture.md](./architecture.md)               | システム構成・認証設計・セキュリティチェックリスト・環境変数 |
+| [data-model.md](./data-model.md)                   | JSONスキーマ（取引/給与/月次/カテゴリ/予算/ライフイベント）  |
+| [api.md](./api.md)                                 | Vercel Functionsエンドポイント仕様・Anthropic呼び出し規約    |
+| [ui.md](./ui.md)                                   | 画面仕様（9画面）                                            |
+| [data-migration.md](./data-migration.md)           | Excel→JSON変換仕様・検証手順                                 |
+| [implementation-plan.md](./implementation-plan.md) | 受け入れ条件付きタスク分解（実装モデルはここから着手）       |

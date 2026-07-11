@@ -1,9 +1,26 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import RequireAuth from "./components/RequireAuth";
+import Login from "./pages/Login";
+import Home from "./pages/Home";
+
 function App() {
   return (
-    <main>
-      <h1>money-lens</h1>
-      <p>セットアップ中です。</p>
-    </main>
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/*"
+            element={
+              <RequireAuth>
+                <Home />
+              </RequireAuth>
+            }
+          />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

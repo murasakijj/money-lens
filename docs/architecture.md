@@ -29,7 +29,7 @@
 ### 設計原則
 
 1. **秘密情報はブラウザに置かない**。Anthropic APIキー・GitHub PATはVercelの環境変数のみに存在し、フロントには一切渡さない。
-2. **すべての /api/* はサーバ側で認証を検証してから応答する**。家計データはトークン検証+メール許可リスト照合を通過しない限り1バイトも返さない。
+2. **すべての `/api/*` はサーバ側で認証を検証してから応答する**。家計データはトークン検証+メール許可リスト照合を通過しない限り1バイトも返さない。
 3. **バックエンドサーバーは持たない**。Vercel Functions（サーバレス）で完結。
 4. **データはGitHub private repoのJSONに保存**し、コミット履歴がそのまま家計データの変更履歴になる。
 
@@ -49,9 +49,9 @@
 
 walk_diary（C:\workspace\walk_diary）で実績のあるパターンの発展形。
 
-| 層 | 役割 |
-|---|---|
-| フロント | FirebaseのGoogleログイン（`signInWithPopup`）。未ログインならログイン画面のみ表示 |
+| 層               | 役割                                                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| フロント         | FirebaseのGoogleログイン（`signInWithPopup`）。未ログインならログイン画面のみ表示                                                     |
 | Vercel Functions | `firebase-admin` の `verifyIdToken()` でトークン検証。`decoded.email` を環境変数 `ALLOWED_EMAILS`（カンマ区切り）と照合。不一致は 403 |
 
 **walk_diaryとの違い（重要）**: walk_diaryはFirestoreのセキュリティルールでデータを守っていたが、本アプリのデータはGitHubにあるため、**Vercel Functions側の検証が唯一の防壁**。フロントだけの制限では守れないので、全エンドポイントで必ず検証すること。
@@ -80,18 +80,18 @@ walk_diary（C:\workspace\walk_diary）で実績のあるパターンの発展�
 
 ## 環境変数（Vercel）
 
-| 変数 | 用途 | 例 |
-|---|---|---|
-| `ANTHROPIC_API_KEY` | Claude API呼び出し | `sk-ant-...` |
-| `GITHUB_TOKEN` | データrepo読み書き（fine-grained PAT） | `github_pat_...` |
-| `GITHUB_DATA_REPO` | データrepo指定 | `murasakijj/money-lens-data` |
-| `ALLOWED_EMAILS` | ログイン許可メール（カンマ区切り） | `xxx@gmail.com` |
+| 変数                       | 用途                                                  | 例                               |
+| -------------------------- | ----------------------------------------------------- | -------------------------------- |
+| `ANTHROPIC_API_KEY`        | Claude API呼び出し                                    | `sk-ant-...`                     |
+| `GITHUB_TOKEN`             | データrepo読み書き（fine-grained PAT）                | `github_pat_...`                 |
+| `GITHUB_DATA_REPO`         | データrepo指定                                        | `murasakijj/money-lens-data`     |
+| `ALLOWED_EMAILS`           | ログイン許可メール（カンマ区切り）                    | `xxx@gmail.com`                  |
 | `FIREBASE_SERVICE_ACCOUNT` | firebase-admin初期化用サービスアカウントJSON（1行化） | `{"type":"service_account",...}` |
 
 フロント側（`VITE_` プレフィックス、公開されて問題ない値のみ）:
 
-| 変数 | 用途 |
-|---|---|
+| 変数                                             | 用途                                            |
+| ------------------------------------------------ | ----------------------------------------------- |
 | `VITE_FIREBASE_API_KEY` ほか firebaseConfig 一式 | Firebase Auth初期化（公開設定値。秘密ではない） |
 
 ---
@@ -109,18 +109,18 @@ walk_diary（C:\workspace\walk_diary）で実績のあるパターンの発展�
 
 ## 技術スタック一覧
 
-| 領域 | 技術 | 備考 |
-|---|---|---|
-| フロント | React 18 + Vite + TypeScript | |
-| ルーティング | react-router-dom | |
-| グラフ | Recharts | |
-| 認証 | Firebase Authentication（Google） | Authのみ使用 |
-| ホスティング | Vercel（Hobby） | pushで自動デプロイ |
-| API | Vercel Functions（`api/` ディレクトリ、Node.js） | |
-| トークン検証 | firebase-admin | |
-| AI | @anthropic-ai/sdk + `claude-sonnet-5` | |
-| データ | GitHub Contents API（money-lens-data） | |
-| 初期データ移行 | Python + openpyxl（ローカル実行のみ） | docs/data-migration.md 参照 |
+| 領域           | 技術                                             | 備考                        |
+| -------------- | ------------------------------------------------ | --------------------------- |
+| フロント       | React 19 + Vite + TypeScript                     |                             |
+| ルーティング   | react-router-dom                                 |                             |
+| グラフ         | Recharts                                         |                             |
+| 認証           | Firebase Authentication（Google）                | Authのみ使用                |
+| ホスティング   | Vercel（Hobby）                                  | pushで自動デプロイ          |
+| API            | Vercel Functions（`api/` ディレクトリ、Node.js） |                             |
+| トークン検証   | firebase-admin                                   |                             |
+| AI             | @anthropic-ai/sdk + `claude-sonnet-5`            |                             |
+| データ         | GitHub Contents API（money-lens-data）           |                             |
+| 初期データ移行 | Python + openpyxl（ローカル実行のみ）            | docs/data-migration.md 参照 |
 
 ---
 

@@ -50,19 +50,19 @@ Excel「収支一覧」シート（カード家計簿アプリのCSVエクスポ
 }
 ```
 
-| フィールド | 型 | 説明 |
-|---|---|---|
-| `id` | string | `t-{year}-{連番6桁}`。移行時に採番。アプリで追加する場合は `t-{year}-{timestamp}` |
-| `date` | string | ISO 8601（YYYY-MM-DD） |
-| `amount` | number | **符号規約: 収入 >= 0、支出 < 0**（Excelマスタシートの規約を踏襲） |
-| `currency` | string | 現状 `"JPY"` 固定 |
-| `description` | string | 明細名（元データはカナ表記が多い） |
-| `memo` | string \| null | 補足 |
-| `category` | string | `categories.json` のキー（元アプリの英語カテゴリをそのまま使用） |
-| `account` | string | 口座/カード名。既存データ: `エポスゴールドカード` / `アトレビューSuicaカード` / `普通`（銀行口座） |
-| `work` | string | 元データの区分（`Personal` 等）。集計には未使用だが保持 |
-| `isSpecial` | boolean | ★特別出費フラグ（旅行・家購入などの非日常出費） |
-| `specialNote` | string \| null | 特別出費の説明 |
+| フィールド    | 型             | 説明                                                                                               |
+| ------------- | -------------- | -------------------------------------------------------------------------------------------------- |
+| `id`          | string         | `t-{year}-{連番6桁}`。移行時に採番。アプリで追加する場合は `t-{year}-{timestamp}`                  |
+| `date`        | string         | ISO 8601（YYYY-MM-DD）                                                                             |
+| `amount`      | number         | **符号規約: 収入 >= 0、支出 < 0**（Excelマスタシートの規約を踏襲）                                 |
+| `currency`    | string         | 現状 `"JPY"` 固定                                                                                  |
+| `description` | string         | 明細名（元データはカナ表記が多い）                                                                 |
+| `memo`        | string \| null | 補足                                                                                               |
+| `category`    | string         | `categories.json` のキー（元アプリの英語カテゴリをそのまま使用）                                   |
+| `account`     | string         | 口座/カード名。既存データ: `エポスゴールドカード` / `アトレビューSuicaカード` / `普通`（銀行口座） |
+| `work`        | string         | 元データの区分（`Personal` 等）。集計には未使用だが保持                                            |
+| `isSpecial`   | boolean        | ★特別出費フラグ（旅行・家購入などの非日常出費）                                                    |
+| `specialNote` | string \| null | 特別出費の説明                                                                                     |
 
 ### 集計上の重要ルール
 
@@ -128,11 +128,11 @@ Excel「給与一覧」シート（2021-11以降、給与/賞与 56件）に対�
 }
 ```
 
-| フィールド | 説明 |
-|---|---|
-| `id` | `s-{year}-{month}`。賞与は `s-{year}-{month}-bonus` |
-| `type` | `"給与"` \| `"賞与"` |
-| `grade` | 給与体系（ML7〜ML10 等）。昇給推移の分析に使用 |
+| フィールド                               | 説明                                                     |
+| ---------------------------------------- | -------------------------------------------------------- |
+| `id`                                     | `s-{year}-{month}`。賞与は `s-{year}-{month}-bonus`      |
+| `type`                                   | `"給与"` \| `"賞与"`                                     |
+| `grade`                                  | 給与体系（ML7〜ML10 等）。昇給推移の分析に使用           |
 | `payments` / `deductions` / `attendance` | Excelの列名をそのままキーにする（値が空のセルは `null`） |
 
 ---
@@ -155,12 +155,12 @@ Excel「統計」シートの ★特別出費マーク・メモ・口座残高�
 }
 ```
 
-| フィールド | 説明 |
-|---|---|
-| `month` | `YYYY-MM` |
-| `isSpecial` | ★マーク。「この月は特別な月」の可視化に使う（メモシートの要望） |
-| `note` | 特別出費の内容（例: `家(東横建設100万円)`、`サイパン旅行代(27万8千円)`） |
-| `balanceStart` / `balanceEnd` | 給与口座の月初/月末残高（円）。資産推移グラフに使用 |
+| フィールド                    | 説明                                                                     |
+| ----------------------------- | ------------------------------------------------------------------------ |
+| `month`                       | `YYYY-MM`                                                                |
+| `isSpecial`                   | ★マーク。「この月は特別な月」の可視化に使う（メモシートの要望）          |
+| `note`                        | 特別出費の内容（例: `家(東横建設100万円)`、`サイパン旅行代(27万8千円)`） |
+| `balanceStart` / `balanceEnd` | 給与口座の月初/月末残高（円）。資産推移グラフに使用                      |
 
 ---
 
@@ -171,79 +171,79 @@ Excel「統計」シートの ★特別出費マーク・メモ・口座残高�
 ```json
 {
   "groups": [
-    { "id": "food",      "label": "食費",        "color": "#e07a5f" },
-    { "id": "transport", "label": "交通",        "color": "#3d5a80" },
-    { "id": "fixed",     "label": "固定費",      "color": "#5f797b" },
-    { "id": "home",      "label": "住まい",      "color": "#81b29a" },
-    { "id": "leisure",   "label": "娯楽・レジャー", "color": "#f2cc8f" },
-    { "id": "shopping",  "label": "買い物",      "color": "#9a8c98" },
-    { "id": "learning",  "label": "教養・自己投資", "color": "#6d597a" },
-    { "id": "health",    "label": "健康・医療",  "color": "#84a59d" },
-    { "id": "social",    "label": "交際・贈答",  "color": "#b5838d" },
-    { "id": "tax_fee",   "label": "税金・手数料", "color": "#8d8d8d" },
-    { "id": "other",     "label": "その他",      "color": "#adb5bd" },
-    { "id": "income",    "label": "収入",        "color": "#2a9d8f" },
-    { "id": "excluded",  "label": "振替（集計除外）", "color": "#ced4da" }
+    { "id": "food", "label": "食費", "color": "#e07a5f" },
+    { "id": "transport", "label": "交通", "color": "#3d5a80" },
+    { "id": "fixed", "label": "固定費", "color": "#5f797b" },
+    { "id": "home", "label": "住まい", "color": "#81b29a" },
+    { "id": "leisure", "label": "娯楽・レジャー", "color": "#f2cc8f" },
+    { "id": "shopping", "label": "買い物", "color": "#9a8c98" },
+    { "id": "learning", "label": "教養・自己投資", "color": "#6d597a" },
+    { "id": "health", "label": "健康・医療", "color": "#84a59d" },
+    { "id": "social", "label": "交際・贈答", "color": "#b5838d" },
+    { "id": "tax_fee", "label": "税金・手数料", "color": "#8d8d8d" },
+    { "id": "other", "label": "その他", "color": "#adb5bd" },
+    { "id": "income", "label": "収入", "color": "#2a9d8f" },
+    { "id": "excluded", "label": "振替（集計除外）", "color": "#ced4da" }
   ],
   "categories": {
-    "Eating Out":        { "label": "外食",           "group": "food" },
-    "Groceries":         { "label": "食料品",         "group": "food" },
-    "Convenience Store": { "label": "コンビニ",       "group": "food" },
-    "Lunch":             { "label": "昼食",           "group": "food" },
-    "Cafe & Coffee Shop":{ "label": "カフェ",         "group": "food" },
-    "Izakaya & Bars":    { "label": "居酒屋・バー",   "group": "food" },
-    "Restaurant":        { "label": "レストラン",     "group": "food" },
-    "Train":             { "label": "電車",           "group": "transport" },
-    "Taxi":              { "label": "タクシー",       "group": "transport" },
-    "Bus":               { "label": "バス",           "group": "transport" },
-    "Gas":               { "label": "ガソリン",       "group": "transport" },
-    "Fuel":              { "label": "燃料",           "group": "transport" },
-    "Tollway":           { "label": "有料道路",       "group": "transport" },
-    "Parking":           { "label": "駐車場",         "group": "transport" },
-    "Rent":              { "label": "家賃",           "group": "fixed" },
-    "Electricity":       { "label": "電気",           "group": "fixed" },
-    "Water":             { "label": "水道",           "group": "fixed" },
-    "Internet":          { "label": "ネット回線",     "group": "fixed" },
-    "Mobile Phone":      { "label": "携帯電話",       "group": "fixed" },
-    "Home":              { "label": "住宅関連",       "group": "home" },
-    "Home Supplies":     { "label": "日用品",         "group": "home" },
-    "Home Improvement":  { "label": "リフォーム・DIY", "group": "home" },
-    "Holiday & Leisure": { "label": "レジャー",       "group": "leisure" },
-    "Entertainment":     { "label": "エンタメ",       "group": "leisure" },
-    "Hotel":             { "label": "宿泊",           "group": "leisure" },
-    "Onsen":             { "label": "温泉",           "group": "leisure" },
-    "Museum & Theatre":  { "label": "美術館・劇場",   "group": "leisure" },
-    "Games":             { "label": "ゲーム",         "group": "leisure" },
-    "Omiyage":           { "label": "お土産",         "group": "leisure" },
-    "Shopping":          { "label": "買い物",         "group": "shopping" },
-    "Clothing":          { "label": "衣類",           "group": "shopping" },
-    "Electronics":       { "label": "家電",           "group": "shopping" },
-    "Beauty":            { "label": "美容",           "group": "shopping" },
-    "Office Supplies":   { "label": "文具",           "group": "shopping" },
-    "Books & Magazines": { "label": "書籍・雑誌",     "group": "learning" },
-    "Education":         { "label": "教育",           "group": "learning" },
-    "Online Service":    { "label": "オンラインサービス", "group": "learning" },
-    "Health & Medical":  { "label": "医療",           "group": "health" },
-    "Pharmacy":          { "label": "薬局",           "group": "health" },
-    "Gifts & Donations": { "label": "贈答・寄付",     "group": "social" },
-    "Charity":           { "label": "寄付",           "group": "social" },
-    "Taxes":             { "label": "税金",           "group": "tax_fee" },
-    "Residency Tax":     { "label": "住民税",         "group": "tax_fee" },
-    "Fees":              { "label": "手数料",         "group": "tax_fee" },
-    "Transfer Fee":      { "label": "振込手数料",     "group": "tax_fee" },
-    "ATM Fee":           { "label": "ATM手数料",      "group": "tax_fee" },
-    "Auto Insurance":    { "label": "自動車保険",     "group": "other" },
-    "Pets":              { "label": "ペット",         "group": "other" },
-    "Shipping":          { "label": "配送料",         "group": "other" },
-    "Cash & ATM":        { "label": "現金引出",       "group": "other" },
-    "Uncategorized":     { "label": "未分類",         "group": "other" },
-    "Salary":            { "label": "給与",           "group": "income" },
-    "Bonus":             { "label": "賞与",           "group": "income" },
-    "Interest Income":   { "label": "利息",           "group": "income" },
-    "Investments":       { "label": "投資",           "group": "income" },
-    "Other Income":      { "label": "その他収入",     "group": "income" },
-    "Card Payment":      { "label": "カード返済",     "group": "excluded" },
-    "Transfer":          { "label": "口座振替",       "group": "excluded" }
+    "Eating Out": { "label": "外食", "group": "food" },
+    "Groceries": { "label": "食料品", "group": "food" },
+    "Convenience Store": { "label": "コンビニ", "group": "food" },
+    "Lunch": { "label": "昼食", "group": "food" },
+    "Cafe & Coffee Shop": { "label": "カフェ", "group": "food" },
+    "Izakaya & Bars": { "label": "居酒屋・バー", "group": "food" },
+    "Restaurant": { "label": "レストラン", "group": "food" },
+    "Train": { "label": "電車", "group": "transport" },
+    "Taxi": { "label": "タクシー", "group": "transport" },
+    "Bus": { "label": "バス", "group": "transport" },
+    "Gas": { "label": "ガソリン", "group": "transport" },
+    "Fuel": { "label": "燃料", "group": "transport" },
+    "Tollway": { "label": "有料道路", "group": "transport" },
+    "Parking": { "label": "駐車場", "group": "transport" },
+    "Rent": { "label": "家賃", "group": "fixed" },
+    "Electricity": { "label": "電気", "group": "fixed" },
+    "Water": { "label": "水道", "group": "fixed" },
+    "Internet": { "label": "ネット回線", "group": "fixed" },
+    "Mobile Phone": { "label": "携帯電話", "group": "fixed" },
+    "Home": { "label": "住宅関連", "group": "home" },
+    "Home Supplies": { "label": "日用品", "group": "home" },
+    "Home Improvement": { "label": "リフォーム・DIY", "group": "home" },
+    "Holiday & Leisure": { "label": "レジャー", "group": "leisure" },
+    "Entertainment": { "label": "エンタメ", "group": "leisure" },
+    "Hotel": { "label": "宿泊", "group": "leisure" },
+    "Onsen": { "label": "温泉", "group": "leisure" },
+    "Museum & Theatre": { "label": "美術館・劇場", "group": "leisure" },
+    "Games": { "label": "ゲーム", "group": "leisure" },
+    "Omiyage": { "label": "お土産", "group": "leisure" },
+    "Shopping": { "label": "買い物", "group": "shopping" },
+    "Clothing": { "label": "衣類", "group": "shopping" },
+    "Electronics": { "label": "家電", "group": "shopping" },
+    "Beauty": { "label": "美容", "group": "shopping" },
+    "Office Supplies": { "label": "文具", "group": "shopping" },
+    "Books & Magazines": { "label": "書籍・雑誌", "group": "learning" },
+    "Education": { "label": "教育", "group": "learning" },
+    "Online Service": { "label": "オンラインサービス", "group": "learning" },
+    "Health & Medical": { "label": "医療", "group": "health" },
+    "Pharmacy": { "label": "薬局", "group": "health" },
+    "Gifts & Donations": { "label": "贈答・寄付", "group": "social" },
+    "Charity": { "label": "寄付", "group": "social" },
+    "Taxes": { "label": "税金", "group": "tax_fee" },
+    "Residency Tax": { "label": "住民税", "group": "tax_fee" },
+    "Fees": { "label": "手数料", "group": "tax_fee" },
+    "Transfer Fee": { "label": "振込手数料", "group": "tax_fee" },
+    "ATM Fee": { "label": "ATM手数料", "group": "tax_fee" },
+    "Auto Insurance": { "label": "自動車保険", "group": "other" },
+    "Pets": { "label": "ペット", "group": "other" },
+    "Shipping": { "label": "配送料", "group": "other" },
+    "Cash & ATM": { "label": "現金引出", "group": "other" },
+    "Uncategorized": { "label": "未分類", "group": "other" },
+    "Salary": { "label": "給与", "group": "income" },
+    "Bonus": { "label": "賞与", "group": "income" },
+    "Interest Income": { "label": "利息", "group": "income" },
+    "Investments": { "label": "投資", "group": "income" },
+    "Other Income": { "label": "その他収入", "group": "income" },
+    "Card Payment": { "label": "カード返済", "group": "excluded" },
+    "Transfer": { "label": "口座振替", "group": "excluded" }
   }
 }
 ```
@@ -312,12 +312,12 @@ Excel「統計」シートの ★特別出費マーク・メモ・口座残高�
 }
 ```
 
-| `type` | 説明 | 主なパラメータ |
-|---|---|---|
-| `housing_loan` | 住宅ローン返済 | 借入額・金利・期間・月額・繰上返済 |
-| `childbirth` | 出産・育児 | 教育方針（公立/私立）・保育費 |
-| `income_change` | 転職・昇給 | 変化後の月収・時期 |
-| `custom` | 任意の定期支出/収入 | 月額・開始/終了 |
+| `type`          | 説明                | 主なパラメータ                     |
+| --------------- | ------------------- | ---------------------------------- |
+| `housing_loan`  | 住宅ローン返済      | 借入額・金利・期間・月額・繰上返済 |
+| `childbirth`    | 出産・育児          | 教育方針（公立/私立）・保育費      |
+| `income_change` | 転職・昇給          | 変化後の月収・時期                 |
+| `custom`        | 任意の定期支出/収入 | 月額・開始/終了                    |
 
 シミュレーターはこれらと過去実績（transactions/salaries）から3〜5年の月次キャッシュフローを試算する。教育費の標準値（公立/私立別の年間費用）はアプリ内に定数として持つ。
 
@@ -333,7 +333,19 @@ Excel「統計」シートの ★特別出費マーク・メモ・口座残高�
     {
       "id": "card-app-csv",
       "label": "カード家計簿アプリCSV",
-      "columns": ["#", "Date", "Amount", "Account Currency", "Description", "Memo", "Receipt", "Category", "Account Name", "Account Number", "Work"]
+      "columns": [
+        "#",
+        "Date",
+        "Amount",
+        "Account Currency",
+        "Description",
+        "Memo",
+        "Receipt",
+        "Category",
+        "Account Name",
+        "Account Number",
+        "Work"
+      ]
     }
   ]
 }
