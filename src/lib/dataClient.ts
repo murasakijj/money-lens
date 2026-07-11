@@ -15,6 +15,18 @@ export interface DataFile<T> {
   content: T;
 }
 
+const dataCache = new Map<string, DataFile<unknown>>();
+const pendingReads = new Map<string, Promise<DataFile<unknown>>>();
+
+export class DataConflictError<T = unknown> extends ApiError {
+  latest: DataFile<T>;
+
+  constructor(latest: DataFile<T>) {
+    super(409, "sha_conflict");
+    this.latest = latest;
+  }
+}
+
 async function authHeader(): Promise<Record<string, string>> {
   const user = auth.currentUser;
   if (!user) {
@@ -40,15 +52,36 @@ export async function checkAuth(): Promise<void> {
   }
 }
 
-export async function getData<T>(file: string): Promise<DataFile<T>> {
-  const headers = await authHeader();
-  const res = await fetch(`/api/data?file=${encodeURIComponent(file)}`, {
-    headers,
-  });
-  if (!res.ok) {
-    throw new ApiError(res.status, await readError(res));
+export async function getData<T>(
+  file: string,
+  options: { force?: boolean } = {},
+): Promise<DataFile<T>> {
+  if (!options.force) {
+    const cached = dataCache.get(file);
+    if (cached) return cached as DataFile<T>;
+    const pending = pendingReads.get(file);
+    if (pending) return pending as Promise<DataFile<T>>;
   }
-  return (await res.json()) as DataFile<T>;
+
+  const request = (async () => {
+    const headers = await authHeader();
+    const res = await fetch(`/api/data?file=${encodeURIComponent(file)}`, {
+      headers,
+    });
+    if (!res.ok) {
+      throw new ApiError(res.status, await readError(res));
+    }
+    const result = (await res.json()) as DataFile<T>;
+    dataCache.set(file, result as DataFile<unknown>);
+    return result;
+  })();
+
+  pendingReads.set(file, request as Promise<DataFile<unknown>>);
+  try {
+    return await request;
+  } finally {
+    if (pendingReads.get(file) === request) pendingReads.delete(file);
+  }
 }
 
 export async function putData(
@@ -64,7 +97,19 @@ export async function putData(
     body: JSON.stringify({ sha, content, message }),
   });
   if (!res.ok) {
-    throw new ApiError(res.status, await readError(res));
+    const message = await readError(res);
+    if (res.status === 409) {
+      const latest = await getData(file, { force: true });
+      throw new DataConflictError(latest);
+    }
+    throw new ApiError(res.status, message);
   }
-  return (await res.json()) as { sha: string };
+  const result = (await res.json()) as { sha: string };
+  dataCache.set(file, { file, sha: result.sha, content });
+  return result;
+}
+
+export function clearDataCache(): void {
+  dataCache.clear();
+  pendingReads.clear();
 }
