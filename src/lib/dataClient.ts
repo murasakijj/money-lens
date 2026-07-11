@@ -97,12 +97,12 @@ export async function putData(
     body: JSON.stringify({ sha, content, message }),
   });
   if (!res.ok) {
-    const message = await readError(res);
+    const errorCode = await readError(res);
     if (res.status === 409) {
       const latest = await getData(file, { force: true });
       throw new DataConflictError(latest);
     }
-    throw new ApiError(res.status, message);
+    throw new ApiError(res.status, errorCode);
   }
   const result = (await res.json()) as { sha: string };
   dataCache.set(file, { file, sha: result.sha, content });
