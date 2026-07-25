@@ -22,3 +22,9 @@ export function formatMonthShort(month: string): string {
   const [y, m] = month.split("-").map(Number);
   return `${String(y).slice(2)}/${m}`;
 }
+
+/** "YYYY-MM-DD" を "7/25" のような短い日付表示にする（明細一覧用）。 */
+export function formatDateShort(date: string): string {
+  const [, m, d] = date.split("-").map(Number);
+  return `${m}/${d}`;
+}

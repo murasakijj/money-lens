@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth";
 import { ApiError, getData } from "../lib/dataClient";
 import {
@@ -173,6 +174,7 @@ export default function Home() {
       <header className="dashboard-header">
         <h1>money-lens</h1>
         <div className="header-actions">
+          <Link to="/transactions">明細</Link>
           <span className="user-email">{user?.email}</span>
           <button type="button" onClick={() => void signOutUser()}>
             ログアウト
