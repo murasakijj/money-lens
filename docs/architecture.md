@@ -21,14 +21,16 @@
 │      │   Firebase IDトークン検証 + メール許可リスト照合 │
 │      ├─ /api/data/*  → GitHub Contents API    │──→ GitHub private repo
 │      │                 （GITHUB_TOKEN使用）    │     money-lens-data（JSON）
-│      └─ /api/analyze, /api/chat               │──→ Anthropic API
-│                        （ANTHROPIC_API_KEY使用）│     claude-sonnet-5
+│      └─ /api/analyze, /api/chat               │──→ AIプロバイダ（抽象化）
+│                        （GEMINI_API_KEY等使用） │     デフォルト: Gemini
 └───────────────────────────────────────────────┘
 ```
 
+AI分析部分は `AI_PROVIDER` 環境変数でプロバイダを切り替え可能（デフォルト: Gemini、代替: Anthropic）。詳細は [docs/api.md](./api.md) の「AIプロバイダの抽象化」参照。
+
 ### 設計原則
 
-1. **秘密情報はブラウザに置かない**。Anthropic APIキー・GitHub PATはVercelの環境変数のみに存在し、フロントには一切渡さない。
+1. **秘密情報はブラウザに置かない**。AIプロバイダのAPIキー・GitHub PATはVercelの環境変数のみに存在し、フロントには一切渡さない。
 2. **すべての `/api/*` はサーバ側で認証を検証してから応答する**。家計データはトークン検証+メール許可リスト照合を通過しない限り1バイトも返さない。
 3. **バックエンドサーバーは持たない**。Vercel Functions（サーバレス）で完結。
 4. **データはGitHub private repoのJSONに保存**し、コミット履歴がそのまま家計データの変更履歴になる。
@@ -82,7 +84,9 @@ walk_diary（C:\workspace\walk_diary）で実績のあるパターンの発展�
 
 | 変数                       | 用途                                                  | 例                               |
 | -------------------------- | ----------------------------------------------------- | -------------------------------- |
-| `ANTHROPIC_API_KEY`        | Claude API呼び出し                                    | `sk-ant-...`                     |
+| `AI_PROVIDER`              | AIプロバイダ選択（`gemini`\|`anthropic`、未設定時は`gemini`） | `gemini`                   |
+| `GEMINI_API_KEY`           | Gemini API呼び出し（デフォルトプロバイダ）            | `AIzaSy...`                      |
+| `ANTHROPIC_API_KEY`        | Claude API呼び出し（`AI_PROVIDER=anthropic`時のみ必須）| `sk-ant-...`                     |
 | `GITHUB_TOKEN`             | データrepo読み書き（fine-grained PAT）                | `github_pat_...`                 |
 | `GITHUB_DATA_REPO`         | データrepo指定                                        | `murasakijj/money-lens-data`     |
 | `ALLOWED_EMAILS`           | ログイン許可メール（カンマ区切り）                    | `xxx@gmail.com`                  |
@@ -98,7 +102,7 @@ walk_diary（C:\workspace\walk_diary）で実績のあるパターンの発展�
 
 ## セキュリティチェックリスト（実装時に必ず守る）
 
-- [ ] `ANTHROPIC_API_KEY` / `GITHUB_TOKEN` / `FIREBASE_SERVICE_ACCOUNT` がフロントのバンドルに含まれないこと（`VITE_` を付けない）
+- [ ] `GEMINI_API_KEY` / `ANTHROPIC_API_KEY` / `GITHUB_TOKEN` / `FIREBASE_SERVICE_ACCOUNT` がフロントのバンドルに含まれないこと（`VITE_` を付けない）
 - [ ] すべての `/api/*` が認証ミドルウェアを通ること（認証なしのエンドポイントを作らない）
 - [ ] `ALLOWED_EMAILS` 照合は小文字化して比較
 - [ ] エラーレスポンスに内部情報（トークン、リポジトリパス等）を含めない

@@ -13,7 +13,7 @@
 | [docs/spec.md](../docs/spec.md)                     | 仕様書（確定版・全体像）                    |
 | [docs/architecture.md](../docs/architecture.md)     | システム構成・認証・セキュリティ・環境変数  |
 | [docs/data-model.md](../docs/data-model.md)         | JSONスキーマ                                |
-| [docs/api.md](../docs/api.md)                       | Vercel Functions仕様・Anthropic呼び出し規約 |
+| [docs/api.md](../docs/api.md)                       | Vercel Functions仕様・AIプロバイダ呼び出し規約 |
 | [docs/ui.md](../docs/ui.md)                         | 画面仕様                                    |
 | [docs/data-migration.md](../docs/data-migration.md) | Excel→JSON移行                              |
 
@@ -25,7 +25,7 @@
 - **API**: Vercel Functions（`api/` ディレクトリ）— 秘密鍵はすべてここ
 - **認証**: Firebase Authentication（Googleログイン）+ Functions側でIDトークン検証 + `ALLOWED_EMAILS` 照合
 - **データ保存**: GitHub private repo `money-lens-data`（JSON、アプリrepoと分離）
-- **AI分析**: Anthropic API `claude-sonnet-5` — Functionsプロキシ経由。`temperature`等のsamplingパラメータは指定禁止（400になる）。SSEストリーミング
+- **AI分析**: Functionsプロキシ経由・SSEストリーミング。プロバイダは `api/_lib/ai/` で抽象化し `AI_PROVIDER` 環境変数で切り替え可能（デフォルト: Gemini／無料枠。代替: Anthropic `claude-sonnet-5`、`temperature`等のsamplingパラメータ指定禁止＝400になる）。詳細は [docs/api.md](../docs/api.md) 参照
 
 ## リポジトリ
 
@@ -34,7 +34,7 @@
 
 ## 絶対に守るセキュリティルール
 
-1. `ANTHROPIC_API_KEY` / `GITHUB_TOKEN` / `FIREBASE_SERVICE_ACCOUNT` をフロントに出さない（`VITE_` を付けない）
+1. `GEMINI_API_KEY` / `ANTHROPIC_API_KEY` / `GITHUB_TOKEN` / `FIREBASE_SERVICE_ACCOUNT` をフロントに出さない（`VITE_` を付けない）
 2. すべての `/api/*` は認証ミドルウェア（IDトークン検証+メール許可リスト）を通す。例外なし
 3. 両リポジトリともPrivateを維持
 4. 認証を先に実装してから中身を作る（Phase 0が最優先）

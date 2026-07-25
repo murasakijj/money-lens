@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth";
 import { ApiError, getData } from "../lib/dataClient";
+import { streamAnalysis } from "../lib/analyzeClient";
+import { buildAnalyzeSummary } from "../lib/summarize";
 import {
   aggregateForMonth,
   budgetUsage,
@@ -52,6 +54,11 @@ export default function Home() {
     transactions: Transaction[];
   } | null>(null);
   const [txError, setTxError] = useState<string | null>(null);
+
+  // Phase 2-1: AI分析の暫定動作確認用（本格的なUIは/analysisで別途実装）。
+  const [analysisText, setAnalysisText] = useState("");
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   // カテゴリ・予算・月次メモは月に依存しないので一度だけ読み込む。
   useEffect(() => {
@@ -169,6 +176,33 @@ export default function Home() {
   const error = masterError ?? txError;
   const loading = !categories || !budgets || !txReady;
 
+  async function runAnalysis() {
+    if (!categories || !budgets) return;
+    setAnalysisLoading(true);
+    setAnalysisError(null);
+    setAnalysisText("");
+    try {
+      const summary = buildAnalyzeSummary({
+        transactions,
+        categories,
+        budgets,
+        monthsMeta,
+        targetMonth: selectedMonth,
+      });
+      for await (const chunk of streamAnalysis(selectedMonth, summary)) {
+        setAnalysisText((prev) => prev + chunk);
+      }
+    } catch (err) {
+      setAnalysisError(
+        err instanceof ApiError
+          ? `AI分析に失敗しました (${err.message})`
+          : "AI分析に失敗しました",
+      );
+    } finally {
+      setAnalysisLoading(false);
+    }
+  }
+
   return (
     <main className="dashboard">
       <header className="dashboard-header">
@@ -214,6 +248,17 @@ export default function Home() {
             excludeSpecial={excludeSpecial}
             onToggleExcludeSpecial={setExcludeSpecial}
           />
+
+          <section className="ai-analysis">
+            <h2>AI分析（動作確認用）</h2>
+            <button type="button" onClick={() => void runAnalysis()} disabled={analysisLoading}>
+              {analysisLoading ? "分析中..." : "AI分析を実行"}
+            </button>
+            {analysisError && <p role="alert">{analysisError}</p>}
+            {analysisText && (
+              <pre className="ai-analysis-result">{analysisText}</pre>
+            )}
+          </section>
         </>
       )}
     </main>
