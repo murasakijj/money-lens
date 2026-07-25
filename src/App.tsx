@@ -4,6 +4,7 @@ import RequireAuth from "./components/RequireAuth";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Transactions from "./pages/Transactions";
+import Import from "./pages/Import";
 
 function App() {
   return (
@@ -16,6 +17,14 @@ function App() {
             element={
               <RequireAuth>
                 <Transactions />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/import"
+            element={
+              <RequireAuth>
+                <Import />
               </RequireAuth>
             }
           />
