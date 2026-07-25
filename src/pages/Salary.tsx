@@ -92,6 +92,7 @@ export default function Salary() {
           <Link to="/">ホーム</Link>
           <Link to="/transactions">明細</Link>
           <Link to="/assets">資産</Link>
+          <Link to="/settings">設定</Link>
           <span className="user-email">{user?.email}</span>
           <button type="button" onClick={() => void signOutUser()}>
             ログアウト

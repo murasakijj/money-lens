@@ -1,0 +1,207 @@
+.settings-page {
+  --surface: #fcfcfb;
+  --surface-alt: #f1f0ed;
+  --border: #e0ded8;
+  --text-primary: #2b2b28;
+  --text-muted: #6b6a65;
+  --positive: #2a9d8f;
+  --negative: #bb4430;
+  --danger: #bb4430;
+
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 12px 12px 32px;
+  color: var(--text-primary);
+}
+
+@media (prefers-color-scheme: dark) {
+  .settings-page {
+    --surface: #1a1a19;
+    --surface-alt: #242422;
+    --border: #38372f;
+    --text-primary: #ececea;
+    --text-muted: #a3a29c;
+    --positive: #4fc3b3;
+    --negative: #e0685a;
+    --danger: #e0685a;
+  }
+}
+
+.settings-page .dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.settings-page .dashboard-header h1 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.settings-page h2 {
+  margin: 4px 0 16px;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.settings-page .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.settings-page .header-actions a {
+  color: inherit;
+}
+
+.settings-section {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.settings-section h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+}
+
+.settings-subsection {
+  margin-bottom: 16px;
+}
+
+.settings-subsection h4 {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.group-list,
+.budget-list,
+.account-list,
+.category-list {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.group-row,
+.budget-row,
+.account-row,
+.category-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.group-row input[type="color"],
+.add-group-form input[type="color"] {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  flex: none;
+}
+
+.group-label {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+.group-id {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.add-group-form,
+.add-account-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.add-group-form input[type="text"],
+.add-account-form input[type="text"] {
+  flex: 1;
+  padding: 8px;
+  font-size: 0.9rem;
+}
+
+.category-group-block {
+  margin-bottom: 10px;
+}
+
+.category-group-heading {
+  margin: 0 0 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.category-row {
+  flex-wrap: wrap;
+}
+
+.category-key {
+  flex: 1 1 160px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-row input[type="text"] {
+  flex: 1 1 140px;
+  padding: 6px 8px;
+  font-size: 0.9rem;
+}
+
+.category-row select {
+  flex: 1 1 120px;
+  padding: 6px 8px;
+  font-size: 0.9rem;
+}
+
+.budget-row input[type="number"] {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 0.9rem;
+}
+
+.budget-row .unit {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.account-row input[type="text"] {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 0.9rem;
+}
+
+.savings-target-field {
+  max-width: 260px;
+  margin-bottom: 12px;
+}
+
+.settings-save-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}

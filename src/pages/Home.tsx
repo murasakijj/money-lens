@@ -178,6 +178,7 @@ export default function Home() {
           <Link to="/import">インポート</Link>
           <Link to="/salary">給与</Link>
           <Link to="/assets">資産</Link>
+          <Link to="/settings">設定</Link>
           <span className="user-email">{user?.email}</span>
           <button type="button" onClick={() => void signOutUser()}>
             ログアウト

@@ -79,6 +79,7 @@ export default function Assets() {
           <Link to="/">ホーム</Link>
           <Link to="/transactions">明細</Link>
           <Link to="/salary">給与</Link>
+          <Link to="/settings">設定</Link>
           <span className="user-email">{user?.email}</span>
           <button type="button" onClick={() => void signOutUser()}>
             ログアウト
