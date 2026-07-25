@@ -5,6 +5,8 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Transactions from "./pages/Transactions";
 import Import from "./pages/Import";
+import Salary from "./pages/Salary";
+import Assets from "./pages/Assets";
 
 function App() {
   return (
@@ -25,6 +27,22 @@ function App() {
             element={
               <RequireAuth>
                 <Import />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/salary"
+            element={
+              <RequireAuth>
+                <Salary />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/assets"
+            element={
+              <RequireAuth>
+                <Assets />
               </RequireAuth>
             }
           />

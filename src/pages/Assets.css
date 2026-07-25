@@ -1,0 +1,75 @@
+.assets-page {
+  --surface: #fcfcfb;
+  --surface-alt: #f1f0ed;
+  --border: #e0ded8;
+  --grid: #e6e4de;
+  --text-primary: #2b2b28;
+  --text-muted: #6b6a65;
+  --positive: #2a9d8f;
+  --negative: #bb4430;
+  --danger: #bb4430;
+
+  /* dataviz skillの検証済みパレット（palette.md）slot 1（blue）/3（aqua）。 */
+  --series-balance-end: #2a78d6;
+  --series-balance-start: #1baf7a;
+
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 12px 12px 32px;
+  color: var(--text-primary);
+}
+
+@media (prefers-color-scheme: dark) {
+  .assets-page {
+    --surface: #1a1a19;
+    --surface-alt: #242422;
+    --border: #38372f;
+    --grid: #333229;
+    --text-primary: #ececea;
+    --text-muted: #a3a29c;
+    --positive: #4fc3b3;
+    --negative: #e0685a;
+    --danger: #e0685a;
+
+    --series-balance-end: #3987e5;
+    --series-balance-start: #199e70;
+  }
+}
+
+.assets-page .dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.assets-page .dashboard-header h1 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.assets-page h2 {
+  margin: 4px 0 16px;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.assets-page .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.assets-page .header-actions a {
+  color: inherit;
+}
+
+.assets-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}

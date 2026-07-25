@@ -176,6 +176,8 @@ export default function Home() {
         <div className="header-actions">
           <Link to="/transactions">明細</Link>
           <Link to="/import">インポート</Link>
+          <Link to="/salary">給与</Link>
+          <Link to="/assets">資産</Link>
           <span className="user-email">{user?.email}</span>
           <button type="button" onClick={() => void signOutUser()}>
             ログアウト

@@ -1,0 +1,114 @@
+.salary-page {
+  --surface: #fcfcfb;
+  --surface-alt: #f1f0ed;
+  --border: #e0ded8;
+  --grid: #e6e4de;
+  --text-primary: #2b2b28;
+  --text-muted: #6b6a65;
+  --positive: #2a9d8f;
+  --negative: #bb4430;
+  --danger: #bb4430;
+
+  /* dataviz skillの検証済みパレット（palette.md）slot 1/2/3/4（blue/orange/aqua/yellow）。
+     折れ線+マーカー3系列はall-pairs検証済み、積み上げ棒4系列は隣接ペア検証済みの並び順。 */
+  --series-gross: #2a78d6;
+  --series-net: #1baf7a;
+  --series-bonus: #eb6834;
+  --series-social: #2a78d6;
+  --series-income-tax: #eb6834;
+  --series-resident-tax: #1baf7a;
+  --series-other: #eda100;
+
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 12px 12px 32px;
+  color: var(--text-primary);
+}
+
+@media (prefers-color-scheme: dark) {
+  .salary-page {
+    --surface: #1a1a19;
+    --surface-alt: #242422;
+    --border: #38372f;
+    --grid: #333229;
+    --text-primary: #ececea;
+    --text-muted: #a3a29c;
+    --positive: #4fc3b3;
+    --negative: #e0685a;
+    --danger: #e0685a;
+
+    --series-gross: #3987e5;
+    --series-net: #199e70;
+    --series-bonus: #d95926;
+    --series-social: #3987e5;
+    --series-income-tax: #d95926;
+    --series-resident-tax: #199e70;
+    --series-other: #c98500;
+  }
+}
+
+.salary-page .dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.salary-page .dashboard-header h1 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.salary-page h2 {
+  margin: 4px 0 16px;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.salary-page .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.salary-page .header-actions a {
+  color: inherit;
+}
+
+.salary-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.salary-fieldset {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 0;
+}
+
+.salary-fieldset legend {
+  padding: 0 4px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.salary-fieldset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 12px;
+}
+
+.modal-field-row {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-field-row .modal-field {
+  flex: 1;
+}

@@ -334,7 +334,6 @@ Excel「統計」シートの ★特別出費マーク・メモ・口座残高�
       "id": "card-app-csv",
       "label": "カード家計簿アプリCSV",
       "columns": [
-        "#",
         "Date",
         "Amount",
         "Account Currency",
