@@ -91,7 +91,7 @@
 
 ### 2-1. 分析API
 
-- `api/analyze.ts` + `api/_lib/prompts.ts`（docs/api.md 準拠。モデルは `claude-sonnet-5`、sampling パラメータ指定禁止、SSEストリーミング、システムプロンプトに cache_control）
+- `api/analyze.ts` + `api/_lib/prompts.ts` + `api/_lib/ai/`（docs/api.md 準拠。AIプロバイダは `AI_PROVIDER` で抽象化、デフォルトはGemini、代替はAnthropic `claude-sonnet-5`。SSEストリーミング）
 - フロントの集計サマリー生成（`src/lib/summarize.ts`、aggregate.ts を再利用）
 
 **受け入れ条件**: 実データの月を分析させ、4段構成（事実→傾向→アクション→将来影響）の日本語出力がストリーミング表示される。出力中の金額が入力サマリーと矛盾しない。
