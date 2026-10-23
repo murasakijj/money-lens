@@ -4,7 +4,15 @@
 docs/data-migration.md の仕様に厳密に従う。
 
 使い方:
+    # 全件移行(初回用)。transactions/*.json と months.json も上書きするので注意
     python3 scripts/migrate_excel.py --input .claude/tmp/budget.xlsx --output ../money-lens-data
+
+    # 給与のみ追記(移行後に給与行を追加する運用)。既存レコードは変更せず、未登録idのみ追記。
+    # transactions / months は一切書き出さない
+    python3 scripts/migrate_excel.py --input .claude/tmp/budget.xlsx --output ../money-lens-data \\
+        --salaries-only [--until YYYY-MM] [--dry-run]
+    #   --until YYYY-MM : その年月より後の行を除外 (--salaries-only 専用)
+    #   --dry-run       : 追記内容を表示するだけで書き出さない (--salaries-only 専用)
 
 出力:
     <output>/transactions/2025.json
@@ -46,59 +54,67 @@ COL_TX_ACCOUNT_NUMBER = 11  # 保存しない
 COL_TX_WORK = 12
 
 # ---------------------------------------------------------------------------
-# 給与一覧シートの列番号 (1-indexed)
+# 給与一覧シートの列定義
+# 列番号はハードコードせず、3行目のヘッダ名から解決する (Excel側で列が挿入されても追従するため)。
+# '#'(列2)と等級(列3, ヘッダ無し)のみ位置固定。
 # ---------------------------------------------------------------------------
 SALARY_SHEET = "給与一覧"
+SALARY_HEADER_ROW = 3
 SALARY_DATA_START_ROW = 4
 COL_S_SEQ = 2
 COL_S_GRADE = 3
-COL_S_YEAR = 4
-COL_S_MONTH = 5
-COL_S_TYPE = 6
-COL_S_GROSS_TOTAL = 7
-COL_S_DEDUCTION_TOTAL = 8
-COL_S_NET_PAY = 9
+
+# 単一値フィールド: 内部名 -> ヘッダ名
+SALARY_SCALAR_HEADERS = {
+    "year": "年",
+    "month": "月",
+    "type": "給与/賞与",
+    "grossTotal": "支給合計",
+    "deductionTotal": "控除合計",
+    "netPay": "差引支給額",
+    "bankTransfer": "銀行振込額",
+    "taxableAmount": "課税対象額",
+}
 
 PAYMENT_FIELDS = [
-    ("基本給", 10),
-    ("住宅手当", 11),
-    ("前払退職金", 12),
-    ("時間外勤務手当", 13),
-    ("深夜手当", 14),
-    ("賞与基本給", 15),
-    ("特別支給", 16),
-    ("その他支給", 17),
-    ("基本給調整", 18),
+    "基本給",
+    "住宅手当",
+    "前払退職金",
+    "時間外勤務手当",
+    "深夜手当",
+    "賞与基本給",
+    "特別支給",
+    "その他支給",
+    "基本給調整",
 ]
 
 DEDUCTION_FIELDS = [
-    ("健康保険", 19),
-    ("厚生年金", 20),
-    ("雇用保険", 21),
-    ("社会保険料合計", 22),
-    ("所得税", 23),
-    ("住民税", 24),
-    ("年調過不足額", 25),
-    ("その他控除額", 26),
-    ("株式購入", 27),
-    ("レインバース", 28),
+    "健康保険",
+    "厚生年金",
+    "雇用保険",
+    "社会保険料合計",
+    "所得税",
+    "住民税",
+    "年調過不足額",
+    "その他控除額",
+    "株式購入",
+    "レインバース",
 ]
 
 ATTENDANCE_FIELDS = [
-    ("所定勤務日数", 29),
-    ("勤務日数", 30),
-    ("欠勤日数", 31),
-    ("時間外勤務時間", 32),
-    ("深夜時間", 33),
-    ("休日時間", 34),
-    ("精算残業時間", 35),
-    ("60時間超", 36),
+    "所定勤務日数",
+    "勤務日数",
+    "欠勤日数",
+    "時間外勤務時間",
+    "深夜時間",
+    "休日時間",
+    "精算残業時間",
+    "60時間超",
 ]
 
-COL_S_BANK_TRANSFER = 38  # 銀行振込額
-COL_S_TAXABLE_AMOUNT = 39  # 課税対象額
-# 「第1口座」(列37)は data-model.md のスキーマに対応フィールドが無く、
-# 実データでは銀行振込額(列38)と常に同値の重複列のため保存しない。
+# 以下のヘッダ列は存在しても読み取らず、保存もしない (JSONスキーマに対応フィールドが無い):
+#   「出勤日調整」(支給グループ) / 「子育て支援金」(控除グループ)
+#   「第1口座」: 実データでは銀行振込額と常に同値の重複列
 
 # ---------------------------------------------------------------------------
 # 統計シートの列番号 (1-indexed)
@@ -216,13 +232,38 @@ def parse_transactions(ws):
 # ---------------------------------------------------------------------------
 # salaries
 # ---------------------------------------------------------------------------
+def resolve_salary_columns(ws):
+    """3行目のヘッダ名 -> 列番号(1-indexed)。必要なヘッダが欠けていれば終了コード1で終了。"""
+    header_to_col = {}
+    for c in range(1, ws.max_column + 1):
+        h = strp(ws.cell(row=SALARY_HEADER_ROW, column=c).value)
+        if h is not None and h not in header_to_col:
+            header_to_col[h] = c
+    required = (
+        list(SALARY_SCALAR_HEADERS.values())
+        + PAYMENT_FIELDS
+        + DEDUCTION_FIELDS
+        + ATTENDANCE_FIELDS
+    )
+    missing = [h for h in required if h not in header_to_col]
+    if missing:
+        print(
+            f"給与一覧の{SALARY_HEADER_ROW}行目に必要なヘッダが見つかりません: {missing}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    return header_to_col
+
+
 def parse_salaries(ws):
+    cols = resolve_salary_columns(ws)
+    col = {key: cols[h] for key, h in SALARY_SCALAR_HEADERS.items()}
     raw_rows = []
     r = SALARY_DATA_START_ROW
     while r <= ws.max_row:
-        gross = ws.cell(row=r, column=COL_S_GROSS_TOTAL).value
-        year_val = ws.cell(row=r, column=COL_S_YEAR).value
-        month_val = ws.cell(row=r, column=COL_S_MONTH).value
+        gross = ws.cell(row=r, column=col["grossTotal"]).value
+        year_val = ws.cell(row=r, column=col["year"]).value
+        month_val = ws.cell(row=r, column=col["month"]).value
         grade_val = ws.cell(row=r, column=COL_S_GRADE).value
         # 年/月/給与・賞与区分は未到来の将来月にも下書きとして入力済みのため、
         # それだけでは実データ行かどうか判定できない。給与体系(grade)が入力されている
@@ -233,16 +274,16 @@ def parse_salaries(ws):
 
         year = int(str(year_val).strip().rstrip("年"))
         month = int(str(month_val).strip().rstrip("月"))
-        s_type = strp(ws.cell(row=r, column=COL_S_TYPE).value)
+        s_type = strp(ws.cell(row=r, column=col["type"]).value)
 
         payments = {
-            name: money(ws.cell(row=r, column=col).value) for name, col in PAYMENT_FIELDS
+            name: money(ws.cell(row=r, column=cols[name]).value) for name in PAYMENT_FIELDS
         }
         deductions = {
-            name: money(ws.cell(row=r, column=col).value) for name, col in DEDUCTION_FIELDS
+            name: money(ws.cell(row=r, column=cols[name]).value) for name in DEDUCTION_FIELDS
         }
         attendance = {
-            name: num(ws.cell(row=r, column=col).value) for name, col in ATTENDANCE_FIELDS
+            name: num(ws.cell(row=r, column=cols[name]).value) for name in ATTENDANCE_FIELDS
         }
 
         raw_rows.append(
@@ -252,13 +293,13 @@ def parse_salaries(ws):
                 "type": s_type,
                 "grade": strp(ws.cell(row=r, column=COL_S_GRADE).value),
                 "grossTotal": money(gross),
-                "deductionTotal": money(ws.cell(row=r, column=COL_S_DEDUCTION_TOTAL).value),
-                "netPay": money(ws.cell(row=r, column=COL_S_NET_PAY).value),
+                "deductionTotal": money(ws.cell(row=r, column=col["deductionTotal"]).value),
+                "netPay": money(ws.cell(row=r, column=col["netPay"]).value),
                 "payments": payments,
                 "deductions": deductions,
                 "attendance": attendance,
-                "bankTransfer": money(ws.cell(row=r, column=COL_S_BANK_TRANSFER).value),
-                "taxableAmount": money(ws.cell(row=r, column=COL_S_TAXABLE_AMOUNT).value),
+                "bankTransfer": money(ws.cell(row=r, column=col["bankTransfer"]).value),
+                "taxableAmount": money(ws.cell(row=r, column=col["taxableAmount"]).value),
                 "note": None,
                 "_row": r,
             }
@@ -348,6 +389,21 @@ def parse_months(ws):
 # ---------------------------------------------------------------------------
 # 検証
 # ---------------------------------------------------------------------------
+def check_netpay(salaries):
+    """netPay == grossTotal - deductionTotal の不一致 [(id, expected, actual)] を返す。"""
+    mismatches = []
+    for s in salaries:
+        if s["grossTotal"] is None or s["deductionTotal"] is None:
+            # 金額未記入の欠損レコード(例: s-2023-12-bonus)。null同士なら整合とみなす。
+            if s["netPay"] is not None:
+                mismatches.append((s["id"], None, s["netPay"]))
+            continue
+        expected = s["grossTotal"] - s["deductionTotal"]
+        if expected != s["netPay"]:
+            mismatches.append((s["id"], expected, s["netPay"]))
+    return mismatches
+
+
 def run_validation(ws_tx, transactions_by_year, raw_tx_rows, salaries, categories_known):
     checks = []
 
@@ -398,16 +454,7 @@ def run_validation(ws_tx, transactions_by_year, raw_tx_rows, salaries, categorie
     salary_count_ok = len(salaries) == 56
     checks.append((f"給与件数56件 (実際={len(salaries)})", salary_count_ok))
 
-    netpay_mismatches = []
-    for s in salaries:
-        if s["grossTotal"] is None or s["deductionTotal"] is None:
-            # 金額未記入の欠損レコード(例: s-2023-12-bonus)。null同士なら整合とみなす。
-            if s["netPay"] is not None:
-                netpay_mismatches.append((s["id"], None, s["netPay"]))
-            continue
-        expected = s["grossTotal"] - s["deductionTotal"]
-        if expected != s["netPay"]:
-            netpay_mismatches.append((s["id"], expected, s["netPay"]))
+    netpay_mismatches = check_netpay(salaries)
     netpay_ok = len(netpay_mismatches) == 0
     detail = "" if netpay_ok else f" 不一致: {netpay_mismatches}"
     checks.append((f"netPay = grossTotal - deductionTotal 整合{detail}", netpay_ok))
@@ -426,11 +473,92 @@ def run_validation(ws_tx, transactions_by_year, raw_tx_rows, salaries, categorie
     return checks
 
 
+def parse_year_month(text):
+    try:
+        y, m = text.split("-")
+        if len(text) != 7 or len(m) != 2:
+            raise ValueError
+        y, m = int(y), int(m)
+        if not 1 <= m <= 12:
+            raise ValueError
+    except ValueError:
+        print(f"--until は YYYY-MM 形式で指定してください: {text}", file=sys.stderr)
+        sys.exit(1)
+    return (y, m)
+
+
+def salary_sort_key(s):
+    return (s["year"], s["month"], 0 if s["type"] == "給与" else 1)
+
+
+def run_salaries_only(wb, output_dir, until, dry_run):
+    """給与一覧のみ解析し、salaries.json に未登録idのレコードだけを追記する。"""
+    salaries, _ = parse_salaries(wb[SALARY_SHEET])
+    if until is not None:
+        # id採番(-bonus判定)は全行で済んでいるので、その後で絞り込む
+        salaries = [s for s in salaries if (s["year"], s["month"]) <= until]
+
+    salaries_path = output_dir / "salaries.json"
+    if not salaries_path.exists():
+        print(f"既存の salaries.json が見つかりません: {salaries_path}", file=sys.stderr)
+        sys.exit(1)
+    with salaries_path.open("r", encoding="utf-8") as f:
+        existing = json.load(f)["salaries"]
+    existing_by_id = {s["id"]: s for s in existing}
+
+    new_records = []
+    for s in salaries:
+        old = existing_by_id.get(s["id"])
+        if old is None:
+            new_records.append(s)
+        elif old != s:
+            keys = sorted(k for k in set(old) | set(s) if old.get(k) != s.get(k))
+            print(f"WARNING: 既存レコード {s['id']} がExcelと異なります (上書きしません): {keys}")
+
+    mismatches = check_netpay(new_records)
+    for sid, expected, actual in mismatches:
+        print(f"[FAIL] {sid}: netPay={actual} だが grossTotal-deductionTotal={expected}")
+    if mismatches:
+        print("検証にFAILがあるため、salaries.json は書き出しません。", file=sys.stderr)
+        sys.exit(2)
+
+    print(f"追記対象: {len(new_records)}件 " + ", ".join(s["id"] for s in new_records))
+    if not new_records:
+        print("追記するレコードはありません。")
+        return
+
+    merged = existing + new_records
+    # 既存レコードの順序は変えない。既存が (年, 月, 給与→賞与) 順なら全体をソート、そうでなければ末尾に追記
+    existing_keys = [salary_sort_key(s) for s in existing]
+    if existing_keys == sorted(existing_keys):
+        merged = sorted(merged, key=salary_sort_key)
+
+    if dry_run:
+        print(f"[dry-run] 書き出しません (書き出した場合は計 {len(merged)}件)")
+        return
+
+    with salaries_path.open("w", encoding="utf-8") as f:
+        json.dump({"salaries": merged}, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+    print(f"書き出し: {salaries_path} ({len(merged)}件、追記{len(new_records)}件)")
+
+
 def main():
     parser = argparse.ArgumentParser(description="money-lens Excel移行スクリプト")
     parser.add_argument("--input", required=True, help="入力xlsxパス")
     parser.add_argument("--output", required=True, help="出力ディレクトリ (money-lens-dataのローカルクローン)")
+    parser.add_argument("--salaries-only", action="store_true",
+                        help="給与一覧のみ解析し salaries.json へ未登録idを追記する (transactions/months は触らない)")
+    parser.add_argument("--until", metavar="YYYY-MM",
+                        help="この年月より後の給与行を除外する (--salaries-only 専用)")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="追記内容を表示するだけで書き出さない (--salaries-only 専用)")
     args = parser.parse_args()
+
+    if (args.until or args.dry_run) and not args.salaries_only:
+        print("--until / --dry-run は --salaries-only と併用してください", file=sys.stderr)
+        sys.exit(1)
+    until = parse_year_month(args.until) if args.until else None
 
     input_path = Path(args.input)
     output_dir = Path(args.output)
@@ -439,6 +567,10 @@ def main():
         sys.exit(1)
 
     wb = openpyxl.load_workbook(str(input_path), data_only=True)
+
+    if args.salaries_only:
+        run_salaries_only(wb, output_dir, until, args.dry_run)
+        return
 
     ws_tx = wb[TX_SHEET]
     ws_salary = wb[SALARY_SHEET]

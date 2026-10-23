@@ -39,10 +39,12 @@ cp "/c/Users/u9c33/OneDrive/ドキュメント/家事/家計簿/収支表.xlsx" 
 
 ### 給与一覧（ヘッダ2段、データは4行目から）
 
-列グループ: 給与情報(年/月/給与・賞与) → 合計(支給合計/控除合計/差引支給額) → 支給(基本給〜基本給調整の9列) → 控除(健康保険〜レインバースの10列) → 勤怠(8列) → 第1口座/銀行振込額/課税対象額 → 記事
+列グループ: 給与情報(年/月/給与・賞与) → 合計(支給合計/控除合計/差引支給額) → 支給(基本給〜基本給調整の9列＋出勤日調整) → 控除(健康保険〜レインバースの10列＋子育て支援金) → 勤怠(8列) → 第1口座/銀行振込額/課税対象額 → 記事
 
 - `年` は「2021年」形式 → 数値に変換。`月` は「11月」形式 → 数値に変換
 - 空セルは `null` のまま保存
+- 「出勤日調整」（支給グループ）と「子育て支援金」（控除グループ）は後からExcelに列挿入されたが、JSONスキーマに対応フィールドが無いため**保存しない**（読み飛ばす）。「第1口座」も同様に保存しない
+- 列番号は固定せず、**3行目のヘッダ名から解決する**（列挿入に追従するため）。必要なヘッダが見つからない場合はエラー終了（終了コード1）。`#`（列2）と等級（列3）のみ位置固定
 
 ### 統計（データは月ごとの行、2025/2026年分）
 
@@ -58,6 +60,22 @@ cp "/c/Users/u9c33/OneDrive/ドキュメント/家事/家計簿/収支表.xlsx" 
 - 入力: `--input <xlsxパス>`、出力: `--output <出力ディレクトリ>`（money-lens-dataのローカルクローンを想定）
 - 出力ファイル: `transactions/2025.json`, `transactions/2026.json`, `salaries.json`, `months.json`
 - `categories.json` / `budgets.json` / `settings.json` は data-model.md の初期値を手動配置（スクリプト出力ではない）
+
+### 給与行の追加（`--salaries-only`）
+
+移行後に給与・賞与の行をExcelへ追加した場合は、**必ず `--salaries-only` を使う**。オプション無しの全件モードは `transactions/*.json` と `months.json` を Excel の内容で上書きするため、アプリのCSVインポートで追加した新しい明細が失われる。
+
+```
+python scripts/migrate_excel.py --input .claude/tmp/budget.xlsx --output ../money-lens-data --salaries-only --dry-run
+python scripts/migrate_excel.py --input .claude/tmp/budget.xlsx --output ../money-lens-data --salaries-only [--until YYYY-MM]
+```
+
+- 給与一覧シートのみ解析し、`<output>/salaries.json` に**未登録の `id` のレコードだけを追記**する。既存レコードは変更・削除しない。`transactions` / `months` は書き出さない
+- 既存 `id` がExcelの内容と異なる場合は `WARNING`（`id` と相違キー）を表示するのみで上書きしない
+- `--until YYYY-MM`: その年月より後の行を除外する（`--salaries-only` 専用。Excel側が未確定の行を除きたいとき用）。`-bonus` サフィックスは全行で採番した後に絞り込む
+- `--dry-run`: 追記される `id` を表示するだけで書き出さない（`--salaries-only` 専用）。先に実行して確認する
+- 新規レコードで `netPay = grossTotal - deductionTotal` が不一致の場合は FAIL を表示し、何も書き出さず終了コード2
+- 出力は `(year, month, 給与→賞与)` 順。既存レコードの並びが崩れる場合は末尾に追記
 
 ### 変換ルール
 
