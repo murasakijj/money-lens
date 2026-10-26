@@ -91,7 +91,7 @@ walk_diary（C:\workspace\walk_diary）で実績のあるパターンの発展�
 | `GITHUB_DATA_REPO`         | データrepo指定                                        | `murasakijj/money-lens-data`     |
 | `ALLOWED_EMAILS`           | ログイン許可メール（カンマ区切り）                    | `xxx@gmail.com`                  |
 | `FIREBASE_PROJECT_ID`      | 共有Firebaseプロジェクトの ID。IDトークン検証のみに使う（推奨）。サービスアカウントは渡さない | `my-shared-project` |
-| `FIREBASE_SERVICE_ACCOUNT` | 旧方式（後方互換）。firebase-admin初期化用サービスアカウントJSON（1行化）。設定されていると `FIREBASE_PROJECT_ID` より優先される。共有プロジェクトでは設定しない | `{"type":"service_account",...}` |
+| `FIREBASE_SERVICE_ACCOUNT` | 旧方式（後方互換）。firebase-admin初期化用サービスアカウントJSON（1行化）。`FIREBASE_PROJECT_ID` が設定されていればそちらが優先され、これは無視される（警告ログのみ）。共有プロジェクトでは設定しない | `{"type":"service_account",...}` |
 
 Firebase は household-chore-manager と同じ共有プロジェクトを使う。サーバーは `verifyIdToken()` しか使わないため `FIREBASE_PROJECT_ID` だけで足り、サービスアカウントを渡さないことで他アプリのデータへの権限を持たせない（`FIREBASE_PROJECT_ID` も `FIREBASE_SERVICE_ACCOUNT` も無い場合は設定エラーで 500。401 とは区別される）。切り替え手順は household-chore-manager の `docs/firebase-consolidation.md` を参照。
 
