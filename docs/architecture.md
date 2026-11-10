@@ -90,13 +90,16 @@ walk_diary（C:\workspace\walk_diary）で実績のあるパターンの発展�
 | `GITHUB_TOKEN`             | データrepo読み書き（fine-grained PAT）                | `github_pat_...`                 |
 | `GITHUB_DATA_REPO`         | データrepo指定                                        | `murasakijj/money-lens-data`     |
 | `ALLOWED_EMAILS`           | ログイン許可メール（カンマ区切り）                    | `xxx@gmail.com`                  |
-| `FIREBASE_SERVICE_ACCOUNT` | firebase-admin初期化用サービスアカウントJSON（1行化） | `{"type":"service_account",...}` |
+| `FIREBASE_PROJECT_ID`      | 共有Firebaseプロジェクトの ID。IDトークン検証のみに使う（推奨）。サービスアカウントは渡さない | `my-shared-project` |
+| `FIREBASE_SERVICE_ACCOUNT` | 旧方式（後方互換）。firebase-admin初期化用サービスアカウントJSON（1行化）。`FIREBASE_PROJECT_ID` が設定されていればそちらが優先され、これは無視される（警告ログのみ）。共有プロジェクトでは設定しない | `{"type":"service_account",...}` |
+
+Firebase は household-chore-manager と同じ共有プロジェクトを使う。サーバーは `verifyIdToken()` しか使わないため `FIREBASE_PROJECT_ID` だけで足り、サービスアカウントを渡さないことで他アプリのデータへの権限を持たせない（`FIREBASE_PROJECT_ID` も `FIREBASE_SERVICE_ACCOUNT` も無い場合は設定エラーで 500。401 とは区別される）。切り替え手順は household-chore-manager の `docs/firebase-consolidation.md` を参照。
 
 フロント側（`VITE_` プレフィックス、公開されて問題ない値のみ）:
 
 | 変数                                             | 用途                                            |
 | ------------------------------------------------ | ----------------------------------------------- |
-| `VITE_FIREBASE_API_KEY` ほか firebaseConfig 一式 | Firebase Auth初期化（公開設定値。秘密ではない） |
+| `VITE_FIREBASE_API_KEY` ほか firebaseConfig 一式 | Firebase Auth初期化（共有プロジェクトの Web アプリ設定。公開設定値で秘密ではない） |
 
 ---
 
@@ -107,7 +110,7 @@ walk_diary（C:\workspace\walk_diary）で実績のあるパターンの発展�
 - [ ] `ALLOWED_EMAILS` 照合は小文字化して比較
 - [ ] エラーレスポンスに内部情報（トークン、リポジトリパス等）を含めない
 - [ ] money-lens / money-lens-data 両リポジトリがPrivateであること
-- [ ] Firebase Authの承認済みドメインにVercelの本番URLのみ登録（プレビューURLは必要時のみ）
+- [ ] Firebase Authの承認済みドメインにVercelの本番URLのみ登録（プレビューURLは必要時のみ）。登録先は共有プロジェクト（household-chore-manager と同じ）の Authentication > 設定 > 承認済みドメイン
 
 ---
 

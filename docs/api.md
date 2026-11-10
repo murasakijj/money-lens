@@ -17,7 +17,7 @@ Authorization: Bearer <Firebase IDトークン>
 
 処理フロー（共通ミドルウェア `api/_lib/auth.ts` に実装）:
 
-1. `firebase-admin` の `auth().verifyIdToken(token)` で検証。失敗 → **401**
+1. `firebase-admin` の `auth().verifyIdToken(token)` で検証。失敗 → **401**（Firebase の設定不備（`FIREBASE_PROJECT_ID` / `FIREBASE_SERVICE_ACCOUNT` のどちらも無い等）は 401 ではなく **500**）
 2. `decoded.email` を小文字化し、環境変数 `ALLOWED_EMAILS`（カンマ区切り・小文字化して比較）と照合。不一致 → **403**
 3. 通過した場合のみハンドラ本体を実行
 

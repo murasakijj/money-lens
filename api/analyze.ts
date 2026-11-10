@@ -72,6 +72,7 @@ export default async function handler(
       res.status(err.statusCode).json({ error: err.message });
       return;
     }
+    console.error("[api] unhandled", err);
     res.status(500).json({ error: "internal_error" });
     return;
   }
@@ -90,7 +91,8 @@ export default async function handler(
   let provider;
   try {
     provider = getAiProvider();
-  } catch {
+  } catch (err) {
+    console.error("[api] unhandled", err);
     res.status(500).json({ error: "internal_error" });
     return;
   }
